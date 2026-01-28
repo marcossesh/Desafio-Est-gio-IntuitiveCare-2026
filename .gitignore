@@ -1,0 +1,19 @@
+# --- Dados (NUNCA enviar para o GitHub) ---
+data/
+*.zip
+*.csv
+*.xlsx
+*.pdf
+
+# --- Python ---
+__pycache__/
+*.pyc
+venv/
+.env
+
+# --- IDEs e Sistema ---
+.vscode/
+.idea/
+.DS_Store
+
+# --- Outros ---
