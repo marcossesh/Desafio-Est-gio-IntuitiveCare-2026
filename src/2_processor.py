@@ -40,12 +40,20 @@ def limpar_dados_criticos(df):
     
     return df
 
+    return df
+
+def consolidar_por_periodo(df):
+    logger.info("Agrupando despesas por operadora e período...")
+    return df.groupby(['CNPJ', 'RazaoSocial', 'Ano', 'Trimestre']).agg({
+        'ValorDespesas': 'sum'
+    }).reset_index()
+
 def extrair_metadados(nome_arquivo):
 
     padrao = re.search(r'(\d)T(\d{4})', nome_arquivo, re.IGNORECASE)
     if padrao:
         return padrao.group(2), padrao.group(1)
-    return "2025", "1" # Valor padrão caso falhe (ajuste conforme necessário)
+    return "2025", "1"
 
 def processar_arquivos(diretorio_origem):
     arquivos = glob.glob(os.path.join(diretorio_origem, "**/*.*"), recursive=True)
@@ -94,7 +102,9 @@ def processar_arquivos(diretorio_origem):
         return pd.DataFrame()
     
     df_consolidado = pd.concat(lista_dfs, ignore_index=True)
-    return limpar_dados_criticos(df_consolidado)
+    df_consolidado = pd.concat(lista_dfs, ignore_index=True)
+    df_limpo = limpar_dados_criticos(df_consolidado)
+    return consolidar_por_periodo(df_limpo)
 
 def zipar_consolidado(caminho_csv, caminho_zip):
     logger.info(f"Compactando arquivo para: {caminho_zip}")
