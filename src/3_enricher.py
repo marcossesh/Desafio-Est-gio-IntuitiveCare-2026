@@ -108,6 +108,12 @@ if __name__ == "__main__":
         
         caminho_zip = "data/enriched/despesas_agregadas.zip"
         zipar_consolidado(caminho_csv, caminho_zip)
+        
+        # NOVO: Salva também o consolidado "limpo" (quarterly) para o banco
+        caminho_consolidado_limpo = "data/enriched/consolidado_enriquecido.csv"
+        df_enriquecido.to_csv(caminho_consolidado_limpo, index=False, encoding='utf-8')
+        logger.info(f"Consolidado limpo gerado para carga SQL: {caminho_consolidado_limpo}")
+        
         logger.info("Fase 2 concluída com sucesso!")
     else:
         logger.warning("Nenhum dado restou após a validação.")
