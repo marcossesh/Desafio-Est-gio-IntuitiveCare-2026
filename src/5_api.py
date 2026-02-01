@@ -35,6 +35,7 @@ def get_db():
         db.close()
 
 class OperadoraResponse(BaseModel):
+    registro_ans: str | None = None
     cnpj: str
     razao_social: str
     modalidade: str
@@ -50,10 +51,17 @@ class PaginatedResponse(BaseModel):
 
 # Rota para lista de operadoras com paginação
 @app.get("/api/operadoras", response_model=PaginatedResponse)
-def list_operadoras(page: int = 1, limit: int = 10, db: Session = Depends(get_db)):
+def list_operadoras(page: int = 1, limit: int = 10, q: str = None, db: Session = Depends(get_db)):
     offset = (page - 1) * limit
     
-    query = db.execute(text("SELECT cnpj, razao_social, modalidade, uf FROM operadoras"))
+    query_str = "SELECT registro_operadora as registro_ans, cnpj, razao_social, modalidade, uf FROM operadoras"
+    params = {}
+    
+    if q:
+        query_str += " WHERE razao_social ILIKE :q"
+        params["q"] = f"%{q}%"
+        
+    query = db.execute(text(query_str), params)
     all_data = query.fetchall()
     
     total = len(all_data)
@@ -122,3 +130,15 @@ def get_global_stats(db: Session = Depends(get_db)):
         "media_despesas": stats["media_geral"],
         "top_5_operadoras": top5
     }
+
+# Rota de Estatísticas por UF
+@app.get("/api/estatisticas/uf")
+def get_uf_distribution(db: Session = Depends(get_db)):
+    query = db.execute(text("""
+        SELECT o.uf, SUM(d.valor_despesa) as total
+        FROM despesas_consolidadas d
+        JOIN operadoras o ON d.cnpj = o.cnpj
+        GROUP BY o.uf
+        ORDER BY total DESC
+    """))
+    return [dict(row._mapping) for row in query.fetchall()]

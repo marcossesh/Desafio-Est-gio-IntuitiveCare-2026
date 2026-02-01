@@ -49,7 +49,8 @@ def validar_e_corrigir(df_consolidado, df_cadastral):
     merged['UF'] = merged['UF'].fillna(current_cnpjs.map(cnpj_to_uf))
     merged['Modalidade'] = merged['Modalidade'].fillna(current_cnpjs.map(cnpj_to_modalidade))
     
-    df = merged.drop(columns=['CNPJ_clean', 'REGISTRO_STR', 'CNPJ_STR', 'Razao_Social'])
+    df = merged.drop(columns=['CNPJ_clean', 'CNPJ_STR', 'Razao_Social'])
+    df = df.rename(columns={'REGISTRO_STR': 'REGISTRO_OPERADORA'})
     
     df['cnpj_valido'] = df['CNPJ'].astype(str).apply(cnpj_validator.validate)
     df = df[df['cnpj_valido'] == True].copy()
@@ -64,7 +65,8 @@ def validar_e_corrigir(df_consolidado, df_cadastral):
 def gerar_agregados(df_enriquecido):
     logger.info("Gerando agregações estatísticas...")
     
-    agregado = df_enriquecido.groupby(['CNPJ', 'RazaoSocial', 'UF', 'Modalidade']).agg({
+    # Adicionando REGISTRO_OPERADORA no agrupamento
+    agregado = df_enriquecido.groupby(['REGISTRO_OPERADORA', 'CNPJ', 'RazaoSocial', 'UF', 'Modalidade']).agg({
         'ValorDespesas': ['sum', 'mean', 'std']
     })
     

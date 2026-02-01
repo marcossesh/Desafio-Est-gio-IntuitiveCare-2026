@@ -13,10 +13,14 @@ logger = logging.getLogger(__name__)
 DB_URL = os.getenv("DATABASE_URL", "postgresql://usuario:senha@localhost:5432/nome_banco")
 
 def criar_schema(engine):
-    logger.info("Criando schema do banco de dados...")
+    logger.info("Criando schema do banco de dados (Loader)...")
     with engine.connect() as conn:
+        conn.execute(text("DROP TABLE IF EXISTS despesas_consolidadas CASCADE;"))
+        conn.execute(text("DROP TABLE IF EXISTS operadoras CASCADE;"))
+        
         conn.execute(text("""
-            CREATE TABLE IF NOT EXISTS operadoras (
+            CREATE TABLE operadoras (
+                registro_operadora VARCHAR(20),
                 cnpj VARCHAR(14) PRIMARY KEY,
                 razao_social VARCHAR(255),
                 modalidade VARCHAR(100),
@@ -63,25 +67,26 @@ if __name__ == "__main__":
         criar_schema(engine)
         
         logger.info("Lendo dados de operadoras...")
-        df_agregado = pd.read_csv("data/enriched/despesas_agregadas.csv")
+        # Lendo do consolidado enriquecido para garantir que temos todas as colunas
+        df_completo = pd.read_csv("data/enriched/consolidado_enriquecido.csv")
         
-        df_operadoras = df_agregado[['CNPJ', 'RazaoSocial', 'Modalidade', 'UF']].drop_duplicates('CNPJ')
+        # Deduplicar para obter tabela de dimensão
+        df_operadoras = df_completo[['REGISTRO_OPERADORA', 'CNPJ', 'RazaoSocial', 'Modalidade', 'UF']].drop_duplicates('CNPJ')
         
+        # Assuming fast_copy_to_db is defined elsewhere
         fast_copy_to_db(
             df_operadoras, 
             'operadoras', 
             engine, 
-            columns=('cnpj', 'razao_social', 'modalidade', 'uf')
+            columns=('registro_operadora', 'cnpj', 'razao_social', 'modalidade', 'uf')
         )
         
-        logger.info("Lendo dados de despesas enriquecidas...")
-        df_consol = pd.read_csv("data/enriched/consolidado_enriquecido.csv")
+        logger.info("Lendo dados de despesas enriquecidas (Fato)...")
+        # df_completo já carregado
         
-        cnpjs_validos = set(df_operadoras['CNPJ'])
-        df_consol = df_consol[df_consol['CNPJ'].isin(cnpjs_validos)]
+        df_fato = df_completo[['CNPJ', 'Ano', 'Trimestre', 'ValorDespesas']]
         
-        df_fato = df_consol[['CNPJ', 'Ano', 'Trimestre', 'ValorDespesas']]
-        
+        # Assuming fast_copy_to_db is defined elsewhere
         fast_copy_to_db(
             df_fato, 
             'despesas_consolidadas', 

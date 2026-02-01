@@ -10,6 +10,7 @@ __pycache__/
 *.pyc
 venv/
 .env
+.pytest_cache/
 
 # --- IDEs e Sistema ---
 .vscode/
@@ -17,3 +18,4 @@ venv/
 .DS_Store
 
 # --- Outros ---
+node_modules/

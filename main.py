@@ -22,16 +22,18 @@ def script_path(name):
         return os.path.join("tests", name)
     return os.path.join("src", name)
 
+def run_frontend_tests():
+    logger.info("Rodando testes do Frontend...")
+    # Executa o npm test dentro da pasta frontend
+    result = subprocess.run(["npm", "test"], cwd="frontend", capture_output=False)
+    if result.returncode != 0:
+        logger.error("Falha nos testes do frontend!")
+        sys.exit(1)
+
 if __name__ == "__main__":
     logger.info("=== INICIANDO PIPELINE DE DADOS INTUITIVE CARE 2026 ===")
 
-    logger.info("Rodando testes unitários...")
-    test_result = subprocess.run(["pytest", "tests/test_pipeline.py"], capture_output=False)
-    if test_result.returncode != 0:
-        logger.error("Testes falharam. Corrija o código antes de prosseguir.")
-        sys.exit(1)
-
-    # 2. Pipeline de ETL
+    # 1. Pipeline de ETL (Execução prioritária conforme solicitado)
     pipeline = [
         "1_scraper.py",    # Extração
         "2_processor.py",  # Consolidação
@@ -43,5 +45,16 @@ if __name__ == "__main__":
     for script in pipeline:
         run_step(script)
 
-    logger.info("PIPELINE FINALIZADO COM SUCESSO!")
-    logger.info("Os dados estão prontos no banco e os CSVs na pasta data/")
+    logger.info("Etapas de ETL finalizadas. Iniciando bateria de testes...")
+
+    # 2. Testes (Executados após garantir que o ambiente e dados existem)
+    logger.info("Rodando testes unitários do Backend...")
+    test_result = subprocess.run([sys.executable, "-m", "pytest", "tests/test_pipeline.py"], capture_output=False)
+    if test_result.returncode != 0:
+        logger.error("Testes do Backend falharam.")
+        sys.exit(1)
+
+    run_frontend_tests()
+
+    logger.info("PIPELINE E TESTES FINALIZADOS COM SUCESSO!")
+    logger.info("Os dados estão prontos no banco e o sistema está validado.")

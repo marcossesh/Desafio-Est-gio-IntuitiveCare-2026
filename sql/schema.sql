@@ -1,4 +1,5 @@
 CREATE TABLE operadoras (
+    registro_operadora VARCHAR(20),
     cnpj VARCHAR(14) PRIMARY KEY,
     razao_social VARCHAR(255),
     modalidade VARCHAR(100),

@@ -34,6 +34,8 @@ def limpar_dados_criticos(df):
     
     df['RazaoSocial'] = df['CNPJ'].map(mapping_razao)
 
+    # Fix: Replace comma with dot for brazilian decimal format before conversion
+    df['ValorDespesas'] = df['ValorDespesas'].astype(str).str.replace(',', '.', regex=False)
     df['ValorDespesas'] = pd.to_numeric(df['ValorDespesas'], errors='coerce').fillna(0)
     
     df = df.dropna(subset=['CNPJ', 'RazaoSocial'])
@@ -76,7 +78,13 @@ def processar_arquivos(diretorio_origem):
             df = normalizar_colunas(df)
             
             if 'CD_CONTA_CONTABIL' in df.columns:
-                df = df[df['CD_CONTA_CONTABIL'].astype(str).str.startswith('411')]
+                # Filtrar apenas CONTAS ANALÍTICAS (Nível 9) do grupo 411 para evitar duplicação de hierarquia (Ex: 411 + 4111...)
+                # Exemplo de conta analítica: 411512061 (9 dígitos)
+                df['CD_CONTA_CONTABIL'] = df['CD_CONTA_CONTABIL'].astype(str)
+                df = df[
+                    (df['CD_CONTA_CONTABIL'].str.startswith('411')) & 
+                    (df['CD_CONTA_CONTABIL'].str.len() == 9)
+                ]
             
             #Se não tem CNPJ mas tem RegAns, usa RegAns
             if 'CNPJ' not in df.columns and 'RegAns' in df.columns:
