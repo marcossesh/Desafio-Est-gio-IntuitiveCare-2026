@@ -16,8 +16,7 @@ def baixar_cadastro_ans(url, destino):
     with open(destino, 'wb') as f:
         f.write(response.content)
 
-    # A ANS costuma usar ';' ou ',' e encoding latin-1
-    return pd.read_csv(destino, sep=None, engine='python', encoding='latin-1')
+    return pd.read_csv(destino, sep=None, engine='python', encoding='utf-8-sig')
 
 def validar_e_corrigir(df_consolidado, df_cadastral):
     logger.info("Iniciando validação e correção de fallbacks (Otimizado via Merge)...")
@@ -109,7 +108,6 @@ if __name__ == "__main__":
         caminho_zip = "data/enriched/despesas_agregadas.zip"
         zipar_consolidado(caminho_csv, caminho_zip)
         
-        # NOVO: Salva também o consolidado "limpo" (quarterly) para o banco
         caminho_consolidado_limpo = "data/enriched/consolidado_enriquecido.csv"
         df_enriquecido.to_csv(caminho_consolidado_limpo, index=False, encoding='utf-8')
         logger.info(f"Consolidado limpo gerado para carga SQL: {caminho_consolidado_limpo}")
