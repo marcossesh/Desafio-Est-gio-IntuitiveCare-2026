@@ -8,7 +8,6 @@ logger = logging.getLogger(__name__)
 
 def run_step(script_name):
     logger.info(f"Iniciando etapa: {script_name}")
-    # Usamos sys.executable para garantir que use o mesmo venv
     result = subprocess.run([sys.executable, script_path(script_name)], capture_output=False)
     
     if result.returncode != 0:
@@ -17,14 +16,12 @@ def run_step(script_name):
 
 def script_path(name):
 
-    # Ajuste conforme a localização dos seus scripts
     if name.startswith("test"):
         return os.path.join("tests", name)
     return os.path.join("src", name)
 
 def run_frontend_tests():
     logger.info("Rodando testes do Frontend...")
-    # Executa o npm test dentro da pasta frontend
     result = subprocess.run(["npm", "test"], cwd="frontend", capture_output=False)
     if result.returncode != 0:
         logger.error("Falha nos testes do frontend!")
