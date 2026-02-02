@@ -145,6 +145,7 @@ onMounted(() => {
           <div v-if="loading && operadoras.length === 0" class="loading-state">
             <div class="spinner"></div>
             <p>Carregando dados...</p>
+            <p class="loading-hint">Acordando o servidor... Isso pode levar alguns segundos na primeira visita</p>
           </div>
 
           <table v-else class="data-table">
@@ -515,6 +516,14 @@ h1 {
   justify-content: center;
   height: 300px;
   color: #94a3b8;
+}
+
+.loading-hint {
+  margin-top: 8px;
+  font-size: 0.85rem;
+  color: #cbd5e1;
+  text-align: center;
+  max-width: 80%;
 }
 
 .spinner {
