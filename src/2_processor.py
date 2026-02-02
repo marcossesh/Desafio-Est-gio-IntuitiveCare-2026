@@ -1,11 +1,13 @@
 import pandas as pd
 import os
-import logging
 import glob
 import re
-import zipfile
+try:
+    from src.utils import setup_logger, zip_file
+except ImportError:
+    from utils import setup_logger, zip_file
 
-logger = logging.getLogger(__name__)
+logger = setup_logger(__name__)
 
 
 # Mapeamento de possíveis nomes de colunas encontrados nos arquivos da ANS
@@ -110,19 +112,14 @@ def processar_arquivos(diretorio_origem):
         return pd.DataFrame()
     
     df_consolidado = pd.concat(lista_dfs, ignore_index=True)
-    df_consolidado = pd.concat(lista_dfs, ignore_index=True)
     df_limpo = limpar_dados_criticos(df_consolidado)
     return consolidar_por_periodo(df_limpo)
 
-def zipar_consolidado(caminho_csv, caminho_zip):
-    logger.info(f"Compactando arquivo para: {caminho_zip}")
-    with zipfile.ZipFile(caminho_zip, 'w', zipfile.ZIP_DEFLATED) as z:
-        z.write(caminho_csv, arcname=os.path.basename(caminho_csv))
+
 
 if __name__ == "__main__":
 
-    logging.basicConfig(level=logging.INFO)
-    
+
     DIRETORIO_RAW = "data/raw/extracted"
     df_final = processar_arquivos(DIRETORIO_RAW)
     
@@ -134,7 +131,7 @@ if __name__ == "__main__":
         logger.info(f"Arquivo consolidado gerado com sucesso: {caminho_csv}")
         
         caminho_zip = "data/processed/consolidado_despesas.zip"
-        zipar_consolidado(caminho_csv, caminho_zip)
+        zip_file(caminho_csv, caminho_zip)
         logger.info("Fase 1 concluída com sucesso!")
     else:
         logger.error("Nenhum dado processado.")

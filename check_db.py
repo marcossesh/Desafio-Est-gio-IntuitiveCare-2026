@@ -3,7 +3,11 @@ from sqlalchemy import create_engine, text
 from dotenv import load_dotenv
 
 load_dotenv()
-DB_URL = os.getenv("DATABASE_URL", "postgresql://usuario:senha@localhost:5432/nome_banco")
+
+DB_URL = os.getenv("DATABASE_URL")
+if not DB_URL:
+    print("ERRO: DATABASE_URL não definida. Verifique o arquivo .env")
+    exit(1)
 
 engine = create_engine(DB_URL)
 with engine.connect() as conn:

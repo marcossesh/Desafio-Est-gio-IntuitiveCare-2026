@@ -49,7 +49,7 @@ class PaginatedResponse(BaseModel):
 
 
 
-# Rota para lista de operadoras com paginação
+
 @app.get("/api/operadoras", response_model=PaginatedResponse)
 def list_operadoras(page: int = 1, limit: int = 10, q: str = None, db: Session = Depends(get_db)):
     offset = (page - 1) * limit
@@ -76,7 +76,7 @@ def list_operadoras(page: int = 1, limit: int = 10, q: str = None, db: Session =
         "limit": limit
     }
 
-# Rota para detalhes de uma operadora específica
+
 @app.get("/api/operadoras/{cnpj}")
 def get_operadora(cnpj: str, db: Session = Depends(get_db)):
     query = db.execute(
@@ -88,7 +88,7 @@ def get_operadora(cnpj: str, db: Session = Depends(get_db)):
         raise HTTPException(status_code=404, detail="Operadora não encontrada")
     return dict(row._mapping)
 
-# Rota para histórico de despesas
+
 @app.get("/api/operadoras/{cnpj}/despesas")
 def get_operadora_despesas(cnpj: str, db: Session = Depends(get_db)):
     query = db.execute(
@@ -102,7 +102,7 @@ def get_operadora_despesas(cnpj: str, db: Session = Depends(get_db)):
     )
     return [dict(row._mapping) for row in query.fetchall()]
 
-# Rota de Estatísticas Globais
+
 @app.get("/api/estatisticas")
 def get_global_stats(db: Session = Depends(get_db)):
     # Total e Média
@@ -131,7 +131,7 @@ def get_global_stats(db: Session = Depends(get_db)):
         "top_5_operadoras": top5
     }
 
-# Rota de Estatísticas por UF
+
 @app.get("/api/estatisticas/uf")
 def get_uf_distribution(db: Session = Depends(get_db)):
     query = db.execute(text("""

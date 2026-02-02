@@ -1,11 +1,13 @@
 import pandas as pd
 import requests
 from validate_docbr import CNPJ
-import logging
 import os
-import zipfile
+try:
+    from src.utils import setup_logger, zip_file
+except ImportError:
+    from utils import setup_logger, zip_file
 
-logger = logging.getLogger(__name__)
+logger = setup_logger(__name__)
 cnpj_validator = CNPJ()
 
 CADASTRO_URL = "https://dadosabertos.ans.gov.br/FTP/PDA/operadoras_de_plano_de_saude_ativas/Relatorio_cadop.csv"
@@ -33,7 +35,6 @@ def validar_e_corrigir(df_consolidado, df_cadastral):
         how='left'
     )
     
-    # Identificar onde houve match pelo Registro ANS
     match_cond = merged['REGISTRO_STR'].notna()
     
     merged['CNPJ'] = merged['CNPJ'].astype(str)
@@ -65,7 +66,6 @@ def validar_e_corrigir(df_consolidado, df_cadastral):
 def gerar_agregados(df_enriquecido):
     logger.info("Gerando agregações estatísticas...")
     
-    # Adicionando REGISTRO_OPERADORA no agrupamento
     agregado = df_enriquecido.groupby(['REGISTRO_OPERADORA', 'CNPJ', 'RazaoSocial', 'UF', 'Modalidade']).agg({
         'ValorDespesas': ['sum', 'mean', 'std']
     })
@@ -73,13 +73,9 @@ def gerar_agregados(df_enriquecido):
     agregado.columns = ['Total_Despesas', 'Media_Trimestral', 'Desvio_Padrao']
     return agregado.sort_values(by='Total_Despesas', ascending=False).reset_index()
 
-def zipar_consolidado(caminho_csv, caminho_zip):
-    logger.info(f"Compactando arquivo para: {caminho_zip}")
-    with zipfile.ZipFile(caminho_zip, 'w', zipfile.ZIP_DEFLATED) as z:
-        z.write(caminho_csv, arcname=os.path.basename(caminho_csv))
+
 
 if __name__ == "__main__":
-    logging.basicConfig(level=logging.INFO)
     
     CAMINHO_CONSOLIDADO = "data/processed/consolidado_despesas.csv"
     CAMINHO_CADASTRO = "data/raw/Relatorio_Cadop.csv"
@@ -108,7 +104,7 @@ if __name__ == "__main__":
         logger.info(f"Arquivo agregado gerado com sucesso: {caminho_csv}")
         
         caminho_zip = "data/enriched/despesas_agregadas.zip"
-        zipar_consolidado(caminho_csv, caminho_zip)
+        zip_file(caminho_csv, caminho_zip)
         
         caminho_consolidado_limpo = "data/enriched/consolidado_enriquecido.csv"
         df_enriquecido.to_csv(caminho_consolidado_limpo, index=False, encoding='utf-8')

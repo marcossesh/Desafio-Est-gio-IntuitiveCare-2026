@@ -6,18 +6,12 @@ import logging
 import zipfile
 import shutil
 
-# Garante que a pasta de dados existe ANTES do logger
-os.makedirs("data", exist_ok=True)
+try:
+    from src.utils import setup_logger
+except ImportError:
+    from utils import setup_logger
 
-logging.basicConfig(
-    level=logging.INFO,
-    format='%(asctime)s - %(levelname)s - %(message)s',
-    handlers=[
-        logging.FileHandler("data/pipeline.log"),
-        logging.StreamHandler()
-    ]
-)
-logger = logging.getLogger(__name__)
+logger = setup_logger(__name__)
 
 BASE_URL = "https://dadosabertos.ans.gov.br/FTP/PDA/demonstracoes_contabeis/"
 

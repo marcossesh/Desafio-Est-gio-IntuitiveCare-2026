@@ -2,7 +2,9 @@
 
 Uma solução completa de ETL, Banco de Dados e Dashboard interativo para análise de despesas de operadoras de planos de saúde (ANS), desenvolvida com foco em **Robustez**, **Precisão Contábil** e **Experiência do Usuário**.
 
-> **Live Demo**: [Acesse o Projeto Online](https://desafio-estagio-intuitive-care.vercel.app/)
+> **Live Demo (Frontend)**: [Acesse a Interface](https://desafio-estagio-intuitive-care.vercel.app/)
+> **API Docs (Backend)**: [Swagger UI](https://intuitive-care-api.onrender.com/docs)
+
 
 ---
 
@@ -78,7 +80,11 @@ Acesse o sistema em: `http://localhost:5173`
 
 ## Arquitetura e Trade-offs Técnicos
 
-Este projeto foi desenvolvido seguindo princípios de **SOLID**, **KISS** (Keep It Simple, Stupid) e **DRY** (Don't Repeat Yourself). Abaixo, justifico as decisões técnicas tomadas para cada desafio proposto.
+Este projeto foi desenvolvido seguindo rigorosamente os princípios de **SOLID**, **KISS** (Keep It Simple, Stupid) e **DRY** (Don't Repeat Yourself), garantindo um código limpo, testável e de fácil manutenção.
+
+Um dos grandes diferenciais desta arquitetura é o uso do **Neon (Serverless PostgreSQL)**, que permite **escalabilidade automática** do banco de dados sob demanda, eliminando gargalos de performance em picos de processamento, sem o custo fixo de instâncias provisionadas tradicionais.
+
+Abaixo, justifico as decisões técnicas tomadas para cada desafio proposto.
 
 ### 1. Processamento de Dados (ETL)
 

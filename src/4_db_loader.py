@@ -5,12 +5,20 @@ import io
 import os
 from dotenv import load_dotenv
 
+try:
+    from src.utils import setup_logger
+except ImportError:
+    from utils import setup_logger
+
 load_dotenv()
 
-logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
-logger = logging.getLogger(__name__)
+logger = setup_logger(__name__)
 
-DB_URL = os.getenv("DATABASE_URL", "postgresql://usuario:senha@localhost:5432/nome_banco")
+DB_URL = os.getenv("DATABASE_URL")
+if not DB_URL:
+    logger.error("DATABASE_URL not found in env. Ensure .env is configured correctly.")
+    import sys
+    sys.exit(1)
 
 def criar_schema(engine):
     logger.info("Criando schema do banco de dados (Loader)...")
@@ -67,13 +75,10 @@ if __name__ == "__main__":
         criar_schema(engine)
         
         logger.info("Lendo dados de operadoras...")
-        # Lendo do consolidado enriquecido para garantir que temos todas as colunas
         df_completo = pd.read_csv("data/enriched/consolidado_enriquecido.csv")
         
-        # Deduplicar para obter tabela de dimensão
         df_operadoras = df_completo[['REGISTRO_OPERADORA', 'CNPJ', 'RazaoSocial', 'Modalidade', 'UF']].drop_duplicates('CNPJ')
         
-        # Assuming fast_copy_to_db is defined elsewhere
         fast_copy_to_db(
             df_operadoras, 
             'operadoras', 
@@ -82,11 +87,9 @@ if __name__ == "__main__":
         )
         
         logger.info("Lendo dados de despesas enriquecidas (Fato)...")
-        # df_completo já carregado
         
         df_fato = df_completo[['CNPJ', 'Ano', 'Trimestre', 'ValorDespesas']]
         
-        # Assuming fast_copy_to_db is defined elsewhere
         fast_copy_to_db(
             df_fato, 
             'despesas_consolidadas', 

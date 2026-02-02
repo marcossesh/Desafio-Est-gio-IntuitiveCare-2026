@@ -35,9 +35,12 @@ if __name__ == "__main__":
         "1_scraper.py",    # Extração
         "2_processor.py",  # Consolidação
         "3_enricher.py",   # Validação e Agregação
-        "0_setup_db.py",   # Preparação do Banco (Docker)
+        "0_setup_db.py",   # Preparação do Banco (Docker) - Opcional
         "4_db_loader.py"   # Carga SQL
     ]
+
+    # Filter out scripts that don't exist (e.g., 0_setup_db.py if not using Docker setup script)
+    pipeline = [s for s in pipeline if os.path.exists(script_path(s))]
 
     for script in pipeline:
         run_step(script)
