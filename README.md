@@ -2,6 +2,17 @@
 
 Uma solução completa de ETL, Banco de Dados e Dashboard interativo para análise de despesas de operadoras de planos de saúde (ANS), desenvolvida com foco em **Robustez**, **Precisão Contábil** e **Experiência do Usuário**.
 
+> **Live Demo**: [Acesse o Projeto Online](https://desafio-estagio-intuitive-care.vercel.app/)
+
+---
+
+## Stack Serverless (Produção)
+
+O projeto está rodando 100% na nuvem com arquitetura moderna:
+-   **Frontend**: Vercel (Edge Network)
+-   **Backend**: Render (Container Service)
+-   **Database**: Neon (Serverless PostgreSQL)
+
 ---
 
 ## Tecnologias Utilizadas
